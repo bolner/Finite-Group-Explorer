@@ -65,7 +65,7 @@ class Classifier {
             for(uint8_t i = 0; i < this->order; i++) {
                 for(uint8_t j = i + 1; j < this->order; j++) {
                     if (*(this->cayley + i*order + j) != *(this->cayley + j*order + i) ) {
-                        this->message = "Not abelian. " + std::to_string(i + 1) + " * " + std::to_string(j + 1)
+                        this->message = "Non-abelian. " + std::to_string(i + 1) + " * " + std::to_string(j + 1)
                             + " != " + std::to_string(j + 1) + " * " + std::to_string(i + 1);
                         return false;
                     }

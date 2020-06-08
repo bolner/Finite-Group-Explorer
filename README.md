@@ -4,10 +4,10 @@ Finite Group Explorer
 Heuristic search algorithms for [abelian](https://en.wikipedia.org/wiki/Abelian_group) and [non-abelian](https://en.wikipedia.org/wiki/Non-abelian_group) [small groups](https://en.wikipedia.org/wiki/List_of_small_groups).
 
 My main motivation was the lack of similar heuristic programs on the internet. I was curious which are the biggest
-groups that can be found this way, and how soon would one reach a combinatorial explosion on current CPUs. (This limit seems to be around order 20-22.)
+groups that can be found this way, and how soon would one reach a combinatorial explosion on current CPUs. (This limit seems to be around order 10 for random search.)
 
-The plan is to develop it to a simple tool that helps to find concrete examples of groups mentioned in text books and to be
-able to generate its representation in many different formats.
+The plan is to develop this application to a simple tool that helps to find concrete examples of
+groups mentioned in text books and to be able to generate their representations in many different formats.
 
 # Modules
 
@@ -15,19 +15,67 @@ The underlying representation of the groups in each module is done by using [Cay
 
 | Module | Description |
 | --- | --- |
-| LatinHeuristics.hpp | Searches for [reduced latin squares](https://en.wikipedia.org/wiki/Latin_square#Reduced_form) and disregards the [associative rule](https://en.wikipedia.org/wiki/Group_(mathematics)#Definition). Its findings might be either quasigroups or groups when associativity appears by chance. |
-| AssocHeuristics.hpp | Searches for proper groups by using the associative rule too. The results can be both abelian and non-abelian. |
-| CycleGraph.hpp | Generates the [Graphviz](https://en.wikipedia.org/wiki/Graphviz) code of the [Cycle Graph](https://en.wikipedia.org/wiki/Cycle_graph_(algebra)) of a group. |
+| [LatinHeuristics.hpp](./LatinHeuristics.hpp) | Searches for [reduced latin squares](https://en.wikipedia.org/wiki/Latin_square#Reduced_form) and disregards the [associative rule](https://en.wikipedia.org/wiki/Group_(mathematics)#Definition). Its findings might be either quasigroups or groups when associativity appears by chance. |
+| [AssocHeuristics.hpp](./AssocHeuristics.hpp) | Searches for proper groups by using the associative rule too. The results can be both abelian and non-abelian. |
+| [RandomHeuristics.hpp](./CycleGraph.hpp) | Same as AssocHeuristics but the search is randomized. |
+| [CycleGraph.hpp](./CycleGraph.hpp) | Generates the [Graphviz](https://en.wikipedia.org/wiki/Graphviz) code of the [Cycle Graph](https://en.wikipedia.org/wiki/Cycle_graph_(algebra)) of a group. |
+| [Classifier.hpp](./Classifier.hpp) | Checks for properties of the group. |
 
-# Example result
+# 1. Example result: A<sub>4</sub>
 
-The [main.cpp](./main.cpp) finds this abelian G<sub>16</sub> group with order of 16.
+A<sub>4</sub> non-abelian, alternating group, order 12.
 
-## Cycle graph
+## 1.2. Cycle graph
+
+![Alt text](./doc/a4.svg)
+
+## 1.3. Generated Graphviz code of the graph
+
+```dot
+strict graph Group {
+    node [shape=circle, fontsize=6, fixedsize=true, width=0.2]
+    1 [style=filled]
+
+    1 -- 2
+    1 -- 3
+    1 -- 4
+    1 -- 5 -- 9 -- 1
+    1 -- 6 -- 12 -- 1
+    1 -- 7 -- 10 -- 1
+    1 -- 8 -- 11 -- 1
+    1 -- 9 -- 5 -- 1
+    1 -- 10 -- 7 -- 1
+    1 -- 11 -- 8 -- 1
+    1 -- 12 -- 6 -- 1
+}
+```
+
+## 1.4. Cayley table
+
+| | | | | | | | | | | | |
+| - | - | - | - | - | - | - | - | - | - | - | - |
+|1|2|3|4|5|6|7|8|9|10|11|12|
+|2|1|4|3|6|5|8|7|10|9|12|11|
+|3|4|1|2|7|8|5|6|11|12|9|10|
+|4|3|2|1|8|7|6|5|12|11|10|9|
+|5|7|8|6|9|11|12|10|1|3|4|2|
+|6|8|7|5|10|12|11|9|2|4|3|1|
+|7|5|6|8|11|9|10|12|3|1|2|4|
+|8|6|5|7|12|10|9|11|4|2|1|3|
+|9|12|10|11|1|4|2|3|5|8|6|7|
+|10|11|9|12|2|3|1|4|6|7|5|8|
+|11|10|12|9|3|2|4|1|7|6|8|5|
+|12|9|11|10|4|1|3|2|8|5|7|6|
+
+# 2. Example result: G<sub>16</sub>
+
+Abelian, order 16.
+
+## 2.1. Cycle graph
 
 ![Alt text](./doc/g16.svg)
 
-## Generated Graphviz code
+## 2.2. Generated Graphviz code of the graph
 
 ```dot
 strict graph Group {
@@ -52,7 +100,7 @@ strict graph Group {
 }
 ```
 
-## Cayley table
+## 2.3. Cayley table
 
 | | | | | | | | | | | | | | | | |
 | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
@@ -75,6 +123,5 @@ strict graph Group {
 
 # TODO
 
-- Implement randomized heuristics
 - Add more tests into the classifier.
 - Find a decent graph rendering tool.

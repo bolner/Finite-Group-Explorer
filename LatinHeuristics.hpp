@@ -232,4 +232,8 @@ class LatinHeuristics {
         bool Found() {
             return this->found;
         }
+
+        uint8_t* GetCayley() {
+            return this->cayley;
+        }
 };

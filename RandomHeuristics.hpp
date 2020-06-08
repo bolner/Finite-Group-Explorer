@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string>
 #include <bitset>
 #include <iomanip>
@@ -24,9 +25,9 @@
 #include <string.h>
 
 /**
- * @brief Find groups (Use the associative property in the heuristic search.)
+ * @brief Find groups. Same as AssocHeuristic, but the search is randomized.
  */
-class AssocHeuristics {
+class RandomHeuristics {
     private:
         int order;
         int size;
@@ -38,6 +39,9 @@ class AssocHeuristics {
         int y;
         int pos;
         bool found;
+        unsigned int seed;
+        uint32_t orderMask;
+        int progress;
         
         inline bool StepForward() {
             if (this->x >= this->order - 1) {
@@ -82,11 +86,16 @@ class AssocHeuristics {
             this->rowValues[this->y] |= bit;
             this->columnValues[this->x] |= bit;
 
+            /*if (this->pos > this->progress) {
+                std::cout << std::setprecision(2);
+                std::cout << (((double)this->pos / (double)this->size) * 100) << "% " << std::flush;
+                this->progress = this->pos;
+            }*/
+
             /*std::cout << "Columns[4]: " << std::bitset<32>(this->columnValues[4]) << '\n';
             std::cout << "Rows[1]: " << std::bitset<32>(this->rowValues[1]) << '\n';
             std::cout << "Track[9]: " << std::bitset<32>(this->track[9]) << '\n';
             */
-            
             // std::cout << this->GetAsText(true) << '\n';
         }
 
@@ -121,13 +130,32 @@ class AssocHeuristics {
 
             start_find:
             
-            uint32_t bitMap = ~(this->track[this->pos] | this->rowValues[this->y] | this->columnValues[this->x]);
-            // https://gcc.gnu.org/onlinedocs/gcc-4.8.0/gcc/Other-Builtins.html
-            int value = __builtin_ffs(bitMap);
-
-            if (value > this->order) {
+            uint32_t bitMap = this->orderMask & ~(this->track[this->pos] | this->rowValues[this->y]
+                | this->columnValues[this->x]);
+            
+            if (bitMap == 0) {
                 this->cayley[this->pos] = oldValue;
-                return value;
+                return this->order + 1;
+            }
+            
+            // https://gcc.gnu.org/onlinedocs/gcc-4.8.0/gcc/Other-Builtins.html
+            
+            int selected = (rand() % __builtin_popcount(bitMap)) + 1;
+            int value = 0;
+
+            do {
+                ++value;
+
+                if (bitMap & (uint32_t)1) {
+                    if (--selected == 0) {
+                        break;
+                    }
+                }
+            } while (bitMap >>= 1);
+
+            if (value > this->order || value == 0) {
+                this->cayley[this->pos] = oldValue;
+                return this->order + 1;
             }
 
             this->cayley[this->pos] = value;
@@ -206,8 +234,9 @@ class AssocHeuristics {
         }
 
     public:
-        AssocHeuristics(uint8_t order) {
+        RandomHeuristics(uint8_t order, unsigned int seed) {
             this->order = order;
+            this->orderMask = (((uint32_t)1) << order) - 1;
             this->size = order * order;
             this->cayley = new uint8_t[this->size];
             this->track = new uint32_t[this->size];
@@ -217,6 +246,9 @@ class AssocHeuristics {
             this->y = 1;
             this->pos = this->order + 1;
             this->found = false;
+            this->seed = seed;
+            srand(seed);
+            this->progress = 0;
 
             memset(this->cayley, 0, this->size * sizeof(uint8_t));
             memset(this->track, 0, this->size * sizeof(uint32_t));
@@ -241,11 +273,48 @@ class AssocHeuristics {
             }
         }
 
-        ~AssocHeuristics() {
+        ~RandomHeuristics() {
             delete[] this->cayley;
             delete[] this->track;
             delete[] this->rowValues;
             delete[] this->columnValues;
+        }
+
+        /**
+         * @brief Clears state and generates a new random seed.
+         */
+        void RestartNewSeed() {
+            time_t t;
+            this->seed ^= rand() ^ time(&t);
+            srand(this->seed);
+
+            memset(this->cayley, 0, this->size * sizeof(uint8_t));
+            memset(this->track, 0, this->size * sizeof(uint32_t));
+            memset(this->rowValues, 0, order * sizeof(uint32_t));
+            memset(this->columnValues, 0, order * sizeof(uint32_t));
+
+            this->x = 1;
+            this->y = 1;
+            this->pos = this->order + 1;
+            this->found = false;
+            this->progress = 0;
+
+            /*
+                Fixed values
+            */
+            for(int i = 0; i < this->order; i++) {
+                /*
+                    Horizontal
+                */
+                *(this->cayley + i) = i + 1;
+                this->columnValues[i] |= 1 << i;
+
+                /*
+                    Vertical
+                */
+                *(this->cayley + i * this->order) = i + 1;
+                this->rowValues[i] |= 1 << i;
+            }
         }
 
         bool Next() {
@@ -272,7 +341,7 @@ class AssocHeuristics {
                 this->Unset(false);
                 this->Set(next);
 
-                // std::cin.get();
+                //std::cin.get();
 
             } while(this->StepForward());
 
@@ -321,7 +390,9 @@ class AssocHeuristics {
         std::string GetAsMarkdown(bool showTrack = false) {
             std::stringstream result;
 
-            result << '|';
+            result << "\n\nSeed: " << this->seed << "\n\n";
+
+            result << "|";
             for(int i = 0; i < this->order; i++) {
                 result << " |";
             }

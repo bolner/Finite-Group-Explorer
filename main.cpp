@@ -16,37 +16,55 @@
 #include <iostream>
 #include "LatinHeuristics.hpp"
 #include "AssocHeuristics.hpp"
+#include "RandomHeuristics.hpp"
 #include "CycleGraph.hpp"
 #include "Classifier.hpp"
 
 int main() {
-    AssocHeuristics heuristics(16);
-    
-    // Problems: 53
+    int order = 8;
+    RandomHeuristics heuristics(order, 473345863);
 
-    for(int i = 0; i < 210; i++) {
+    while(true) {
         heuristics.Next();
-    }
 
-    std::cout << heuristics.GetAsMarkdown() << "\n\n";
-    
-    CycleGraph graph(16, heuristics.GetCayley());
-    std::cout << graph.GetGraphVizCode() << "\n";
+        /*while (heuristics.Next()) {
+            Classifier classifier(order, heuristics.GetCayley());
+            if (!classifier.IsAbelian()) {
+                break;
+            }
+        }*/
 
-    /*
-        Check associativity for testing only, because
-        the AssocHeuristics should already guarantee
-        that.
-    */
-    Classifier classifier(16, heuristics.GetCayley());
-    if (!classifier.IsAssociative()) {
-        std::cout << "\n" << classifier.GetMessage() << "\n\n";
-    }
+        if (!heuristics.Found()) {
+            std::cout << "\nNothing found.\n\n";
+            return 0;
+        }
+        
+        std::cout << heuristics.GetAsMarkdown() << "\n\n";
+        
+        CycleGraph graph(order, heuristics.GetCayley());
+        std::cout << graph.GetGraphVizCode() << "\n";
 
-    if (!classifier.IsAbelian()) {
-        std::cout << "\n" << classifier.GetMessage() << "\n\n";
-    } else {
-        std::cout << "\nThe group is abelian.\n\n";
+        /*
+            Check associativity for testing only, because
+            the heuristics should already guarantee
+            that.
+        */
+        Classifier classifier(order, heuristics.GetCayley());
+        if (!classifier.IsAssociative()) {
+            std::cout << "\n" << classifier.GetMessage() << "\n\n";
+        }
+
+        if (!classifier.IsAbelian()) {
+            std::cout << "\n" << classifier.GetMessage() << "\n\n";
+        } else {
+            std::cout << "\nThe group is abelian.\n\n";
+        }
+
+        std::cout << "Press enter to continue...\n";
+        std::cout << std::flush;
+
+        std::cin.get();
+        heuristics.RestartNewSeed();
     }
     
     return 0;
