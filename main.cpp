@@ -22,7 +22,8 @@
 
 int main() {
     int order = 8;
-    RandomHeuristics heuristics(order, 473345863);
+    RandomHeuristics heuristics(order, 473345863);  // 473345863
+    std::cout << "\n\nSeed: " << heuristics.GetSeed() << "\n\n";
 
     while(true) {
         heuristics.Next();
@@ -64,7 +65,8 @@ int main() {
         std::cout << std::flush;
 
         std::cin.get();
-        heuristics.RestartNewSeed();
+        
+        // heuristics.RestartNewSeed();
     }
     
     return 0;

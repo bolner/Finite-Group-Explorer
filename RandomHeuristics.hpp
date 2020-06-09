@@ -390,8 +390,6 @@ class RandomHeuristics {
         std::string GetAsMarkdown(bool showTrack = false) {
             std::stringstream result;
 
-            result << "\n\nSeed: " << this->seed << "\n\n";
-
             result << "|";
             for(int i = 0; i < this->order; i++) {
                 result << " |";
@@ -415,5 +413,9 @@ class RandomHeuristics {
             }
 
             return result.str();
+        }
+
+        unsigned int GetSeed() {
+            return this->seed;
         }
 };
