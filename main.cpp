@@ -21,36 +21,28 @@
 #include "Classifier.hpp"
 
 int main() {
-    int order = 8;
-    RandomHeuristics heuristics(order, 473345863);  // 473345863
-    std::cout << "\n\nSeed: " << heuristics.GetSeed() << "\n\n";
+    int order = 12;
+    AssocHeuristics heuristics(order);
 
     while(true) {
         heuristics.Next();
-
-        /*while (heuristics.Next()) {
-            Classifier classifier(order, heuristics.GetCayley());
-            if (!classifier.IsAbelian()) {
-                break;
-            }
-        }*/
-
+        
         if (!heuristics.Found()) {
             std::cout << "\nNothing found.\n\n";
             return 0;
         }
-        
-        std::cout << heuristics.GetAsMarkdown() << "\n\n";
+
+        Classifier classifier(order, heuristics.GetCayley());
+        std::cout << classifier.PrintGroup() << "\n\n";
         
         CycleGraph graph(order, heuristics.GetCayley());
-        std::cout << graph.GetGraphVizCode() << "\n";
+        std::cout << graph.GetCsAcademyCode() << "\n";
 
         /*
             Check associativity for testing only, because
             the heuristics should already guarantee
             that.
         */
-        Classifier classifier(order, heuristics.GetCayley());
         if (!classifier.IsAssociative()) {
             std::cout << "\n" << classifier.GetMessage() << "\n\n";
         }
@@ -58,15 +50,16 @@ int main() {
         if (!classifier.IsAbelian()) {
             std::cout << "\n" << classifier.GetMessage() << "\n\n";
         } else {
-            std::cout << "\nThe group is abelian.\n\n";
+            std::cout << "The group is abelian.\n\n";
         }
+
+        auto subgroups = classifier.GetSubGroups();
+        std::cout << "Subgroups:\n" << classifier.PrintSubgroups(subgroups);
 
         std::cout << "Press enter to continue...\n";
         std::cout << std::flush;
 
         std::cin.get();
-        
-        // heuristics.RestartNewSeed();
     }
     
     return 0;

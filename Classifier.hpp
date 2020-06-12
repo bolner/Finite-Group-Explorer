@@ -15,8 +15,11 @@
 */
 #pragma once
 
+#include <iostream>
 #include <stdint.h>
 #include <string>
+#include <vector>
+#include "Combinator.hpp"
 
 class Classifier {
     private:
@@ -73,5 +76,143 @@ class Classifier {
             }
 
             return true;
+        }
+
+        /**
+         * @brief Returns the proper non-trivial subgroups of the group.
+         */
+        std::vector<std::vector<uint8_t>> GetSubGroups() {
+            std::vector<std::vector<uint8_t>> subgroups;
+            int checkTo = this->order >> 1;
+            std::vector<uint8_t> v(this->order, 0);
+            int i, j, k;
+            
+            for(int subgroupOrder = 2; subgroupOrder <= checkTo; subgroupOrder++) {
+                if (this->order % subgroupOrder != 0) {
+                    /*
+                        Lagrange's theorem
+                    */
+                    continue;
+                }
+
+                /*
+                    Select all combinations of "subgroupOrder" number
+                    of elements, and see if they are closed under
+                    the group operation. We don't need to check
+                    inversion and associativity, because those
+                    properties can't change if we take a subset.
+                */
+                Combinator combi(this->order, subgroupOrder);
+                bool notFound;
+
+                while(combi.Next(v)) {
+                    for(i = 0; i < subgroupOrder; i++) {
+                        for(j = 0; j < subgroupOrder; j++) {
+                            uint8_t value = *(this->cayley + v[i] * this->order + v[j]) - 1;
+                            notFound = true;
+
+                            for(k = 0; k < subgroupOrder; k++) {
+                                if (v[k] == value) {
+                                    notFound = false;
+                                    break;
+                                }
+                            }
+
+                            if (notFound) {
+                                goto nextCombination;
+                            }
+                        }
+                    }
+
+                    /*
+                        It is a proper subgroup.
+                        Store it.
+                    */
+                    for (i = 0; i < subgroupOrder; i++) {
+                        v[i]++; // convert the indices to group values
+                    }
+                    subgroups.push_back(v);
+
+                    nextCombination: ;
+                }
+            }
+
+            return subgroups;
+        }
+/*
+        std::vector<std::vector<uint8_t>> GetNormalSubGroups() {
+            
+        }
+*/
+        bool IsSimple() {
+            
+
+            return false;
+        }
+
+        std::string PrintSubgroups(std::vector<std::vector<uint8_t>> &subgroups) {
+            std::stringstream o;
+
+            if (subgroups.size() < 1) {
+                return std::string();
+            }
+
+            for(const auto &group : subgroups) {
+                o << "\n| * |";
+
+                for(const uint8_t &e1 : group) {
+                    o << (int)e1 << "|";
+                }
+
+                o << "\n|";
+
+                for(unsigned int i = 0; i <= group.size(); i++) {
+                    o << " - |";
+                }
+
+                o << "\n";
+
+                for(const uint8_t &e1 : group) {
+                    o << "|<b>" << (int)e1 << "</b>|";
+
+                    for(const uint8_t &e2 : group) {
+                        o << (int)this->cayley[(e1 - 1) * this->order + e2 - 1] << "|";
+                    }
+
+                    o << '\n';
+                }
+            }
+
+            return o.str();
+        }
+
+        std::string PrintGroup() {
+            std::stringstream o;
+
+            o << "\n| * |";
+
+            for(int i = 1; i <= this->order; i++) {
+                o << i << "|";
+            }
+
+            o << "\n|";
+
+            for(int i = 0; i <= this->order; i++) {
+                o << " - |";
+            }
+
+            o << "\n";
+
+            for(int i = 0; i < this->order; i++) {
+                o << "|<b>" << (i + 1) << "</b>|";
+
+                for(int j = 0; j < this->order; j++) {
+                    o << (int)this->cayley[i * this->order + j] << "|";
+                }
+
+                o << '\n';
+            }
+
+            return o.str();
         }
 };

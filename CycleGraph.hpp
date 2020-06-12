@@ -145,4 +145,62 @@ class CycleGraph {
 
             return code.str();
         }
+
+        std::string GetCsAcademyCode() {
+            std::stringstream code;
+            uint32_t added = 0;
+            auto cycleGroupIter = this->cycles.end();
+
+            do {
+                /*
+                    Progress from the longest cycles to the shortest.
+                */
+                cycleGroupIter--;
+
+                for(const auto &cycle : *(cycleGroupIter->second)) {
+                    uint32_t cycleID =(uint32_t)1 << (*cycle.begin() - 1);
+
+                    /*
+                        Check if the cycle is already contained by another one.
+                    */
+                    uint32_t test = 0xFFFFFFFFU;
+                    for(int element : cycle) {
+                        test &= this->cyclesByValues[element];
+
+                        if (!test) {
+                            break;
+                        }
+                    }
+
+                    if (test & added) {
+                        continue;
+                    }
+                    
+                    /*
+                        Print cycle
+                    */
+                    added |= cycleID;
+
+                    for(auto iter = cycle.begin(); iter != cycle.end(); iter++) {
+                        if (iter == cycle.begin()) {
+                            code << "1 " << *iter << '\n';
+                        }
+
+                        auto next = std::next(iter);
+
+                        if (next == cycle.end()) {
+                            code << *iter << " 1\n";
+                            break;
+                        }
+
+                        code << *iter << ' ' << *next << '\n';
+                    }
+
+                    code << '\n';
+                }
+
+            } while(cycleGroupIter != this->cycles.begin());
+
+            return code.str();
+        }
 };

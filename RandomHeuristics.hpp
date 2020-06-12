@@ -235,6 +235,10 @@ class RandomHeuristics {
 
     public:
         RandomHeuristics(uint8_t order, unsigned int seed) {
+            if (order < 2 || order > 32) {
+                throw std::runtime_error("Invalid order value. Allowed: 2 -> 32");
+            }
+            
             this->order = order;
             this->orderMask = (((uint32_t)1) << order) - 1;
             this->size = order * order;
@@ -385,34 +389,6 @@ class RandomHeuristics {
 
         uint8_t* GetCayley() {
             return this->cayley;
-        }
-
-        std::string GetAsMarkdown(bool showTrack = false) {
-            std::stringstream result;
-
-            result << "|";
-            for(int i = 0; i < this->order; i++) {
-                result << " |";
-            }
-
-            result << "\n|";
-            for(int i = 0; i < this->order; i++) {
-                result << " - |";
-            }
-
-            result << '\n';
-
-            for(int i = 0; i < this->order; i++) {
-                result << '|';
-
-                for(int j = 0; j < this->order; j++) {
-                    result << (int)(*(this->cayley + j + i * this->order)) << "|";
-                }
-
-                result << '\n';
-            }
-
-            return result.str();
         }
 
         unsigned int GetSeed() {
