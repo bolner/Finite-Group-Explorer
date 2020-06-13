@@ -21,7 +21,7 @@
 #include "Classifier.hpp"
 
 int main() {
-    int order = 12;
+    int order = 8;
     AssocHeuristics heuristics(order);
 
     while(true) {
@@ -36,25 +36,9 @@ int main() {
         std::cout << classifier.PrintGroup() << "\n\n";
         
         CycleGraph graph(order, heuristics.GetCayley());
-        std::cout << graph.GetCsAcademyCode() << "\n";
+        std::cout << graph.PrintCyclicSubgroups() << "\n";
 
-        /*
-            Check associativity for testing only, because
-            the heuristics should already guarantee
-            that.
-        */
-        if (!classifier.IsAssociative()) {
-            std::cout << "\n" << classifier.GetMessage() << "\n\n";
-        }
-
-        if (!classifier.IsAbelian()) {
-            std::cout << "\n" << classifier.GetMessage() << "\n\n";
-        } else {
-            std::cout << "The group is abelian.\n\n";
-        }
-
-        auto subgroups = classifier.GetSubGroups();
-        std::cout << "Subgroups:\n" << classifier.PrintSubgroups(subgroups);
+        std::cout << "Properties: " << classifier.PrintAllProperties() << "\n\n";
 
         std::cout << "Press enter to continue...\n";
         std::cout << std::flush;

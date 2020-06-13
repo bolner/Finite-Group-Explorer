@@ -18,18 +18,19 @@ The underlying representation of the groups in each module is done by using [Cay
 | [LatinHeuristics.hpp](./LatinHeuristics.hpp) | Searches for [reduced latin squares](https://en.wikipedia.org/wiki/Latin_square#Reduced_form) and disregards the [associative rule](https://en.wikipedia.org/wiki/Group_(mathematics)#Definition). Its findings might be either quasigroups or groups when associativity appears by chance. |
 | [AssocHeuristics.hpp](./AssocHeuristics.hpp) | Searches for proper groups by using the associative rule too. The results can be both abelian and non-abelian. |
 | [RandomHeuristics.hpp](./CycleGraph.hpp) | Same as AssocHeuristics but the search is randomized. This has much worse performance. |
-| [CycleGraph.hpp](./CycleGraph.hpp) | Generates the [Graphviz](https://en.wikipedia.org/wiki/Graphviz) or the [CsAcademy](https://csacademy.com/app/graph_editor/) code of the [Cycle Graph](https://en.wikipedia.org/wiki/Cycle_graph_(algebra)) of a group. |
-| [Classifier.hpp](./Classifier.hpp) | Checks for properties of the group. |
+| [CycleGraph.hpp](./CycleGraph.hpp) | Can generate the [Graphviz](https://dreampuf.github.io/GraphvizOnline/) and the [CsAcademy](https://csacademy.com/app/graph_editor/) code of the [Cycle Graph](https://en.wikipedia.org/wiki/Cycle_graph_(algebra)) of a group. Can also list the cyclic subgroups of the group. |
+| [Classifier.hpp](./Classifier.hpp) | Checks for properties of the group. Now supports: Associative,
+Abelian, Cyclic, Simple, Dedekind, Hamiltonian. Can list the subgroups and normal subgroups. |
 
 # 1. Example result: A<sub>4</sub>
 
 A<sub>4</sub> non-abelian, alternating group, order 12.
 
-## 1.2. Cycle graph
+## 1.1. Cycle graph
 
 ![Alt text](./doc/a4.svg)
 
-## 1.3. Cayley table
+## 1.2. Cayley table
 
 | * |1|2|3|4|5|6|7|8|9|10|11|12|
 | - | - | - | - | - | - | - | - | - | - | - | - | - |

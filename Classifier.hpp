@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <set>
 #include "Combinator.hpp"
 
 class Classifier {
@@ -51,6 +52,7 @@ class Classifier {
                             this->message = "Not associative. (" + std::to_string(i + 1) + " * " + std::to_string(j + 1)
                                 + ") * " + std::to_string(k + 1) + " != " + std::to_string(i + 1) + " * ("
                                 + std::to_string(j + 1) + " * " + std::to_string(k + 1) + ")";
+                            
                             return false;
                         }
                     }
@@ -60,7 +62,7 @@ class Classifier {
             return true;
         }
 
-        std::string GetMessage() {
+        std::string GetMessage() const {
             return this->message;
         }
 
@@ -70,6 +72,7 @@ class Classifier {
                     if (*(this->cayley + i*order + j) != *(this->cayley + j*order + i) ) {
                         this->message = "Non-abelian. " + std::to_string(i + 1) + " * " + std::to_string(j + 1)
                             + " != " + std::to_string(j + 1) + " * " + std::to_string(i + 1);
+                        
                         return false;
                     }
                 }
@@ -81,7 +84,7 @@ class Classifier {
         /**
          * @brief Returns the proper non-trivial subgroups of the group.
          */
-        std::vector<std::vector<uint8_t>> GetSubGroups() {
+        std::vector<std::vector<uint8_t>> GetSubGroups() const {
             std::vector<std::vector<uint8_t>> subgroups;
             int checkTo = this->order >> 1;
             std::vector<uint8_t> v(this->order, 0);
@@ -139,18 +142,72 @@ class Classifier {
 
             return subgroups;
         }
-/*
-        std::vector<std::vector<uint8_t>> GetNormalSubGroups() {
-            
-        }
-*/
-        bool IsSimple() {
-            
 
-            return false;
+        bool IsSubGroupNormal(const std::vector<uint8_t> &subgroup) const {
+            for(int g = 0; g < this->order; g++) {
+                /*
+                    Find inverse of g
+                */
+                int inv;
+
+                for(inv = 0; inv < this->order; inv++) {
+                    if (*(this->cayley + inv * this->order + g) == 1) {
+                        goto foundInverse;
+                    }
+                }
+
+                throw std::runtime_error("Element " + std::to_string(g + 1) + " has no inverse.");
+
+                foundInverse:
+
+                /*
+                    Check if all g*n*inv element of G
+                */
+                for(int n : subgroup) {
+                    int gn = *(this->cayley + g * this->order + n - 1) - 1;
+                    int gni = *(this->cayley + gn * this->order + inv);
+
+                    for(int n2 : subgroup) {
+                        if (n2 == gni) {
+                            goto checkNext;
+                        }
+                    }
+
+                    return false;
+
+                    checkNext: ;
+                }
+            }
+
+            return true;
         }
 
-        std::string PrintSubgroups(std::vector<std::vector<uint8_t>> &subgroups) {
+        bool IsSimple() const {
+            auto subgoups = this->GetSubGroups();
+
+            for(const auto &subgroup : subgoups) {
+                if (this->IsSubGroupNormal(subgroup)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        std::vector<std::vector<uint8_t>> GetNormalSubGroups() const {
+            std::vector<std::vector<uint8_t>> normalSubgroups;
+            auto subgoups = this->GetSubGroups();
+
+            for(const auto &subgroup : subgoups) {
+                if (this->IsSubGroupNormal(subgroup)) {
+                    normalSubgroups.push_back(subgroup);
+                }
+            }
+
+            return normalSubgroups;
+        }
+
+        std::string PrintSubgroups(std::vector<std::vector<uint8_t>> &subgroups) const {
             std::stringstream o;
 
             if (subgroups.size() < 1) {
@@ -167,7 +224,7 @@ class Classifier {
                 o << "\n|";
 
                 for(unsigned int i = 0; i <= group.size(); i++) {
-                    o << " - |";
+                    o << " --- |";
                 }
 
                 o << "\n";
@@ -186,7 +243,7 @@ class Classifier {
             return o.str();
         }
 
-        std::string PrintGroup() {
+        std::string PrintGroup() const {
             std::stringstream o;
 
             o << "\n| * |";
@@ -198,7 +255,7 @@ class Classifier {
             o << "\n|";
 
             for(int i = 0; i <= this->order; i++) {
-                o << " - |";
+                o << " --- |";
             }
 
             o << "\n";
@@ -211,6 +268,88 @@ class Classifier {
                 }
 
                 o << '\n';
+            }
+
+            return o.str();
+        }
+
+        bool IsDedekind() {
+            auto subgoups = this->GetSubGroups();
+
+            for(const auto &subgroup : subgoups) {
+                if (!this->IsSubGroupNormal(subgroup)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        bool IsHamiltonian() {
+            if (this->IsAbelian()) {
+                return false;
+            }
+
+            return this->IsDedekind();
+        }
+
+        /**
+         * @brief A group is cyclic if it contains
+         * at least one element that can generate
+         * the group through a power sequence.
+         */
+        bool IsCyclic() {
+            uint32_t goal = (((uint32_t)1) << this->order) - 1;
+
+            // Skip the identity element 0
+            for(int g = 1; g < this->order; g++) {
+                uint32_t bitMask = 1 | (((uint32_t)1) << g);
+                int e = g;
+                
+                for(int n = 0; n < this->order; n++) {
+                    // e = e * g
+                    e = *(this->cayley + e * this->order + g) - 1;
+                    if (e == 0) {
+                        break;
+                    }
+
+                    bitMask |= ((uint32_t)1) << e;
+                }
+
+                if (bitMask == goal) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        std::string PrintAllProperties() {
+            std::stringstream o;
+
+            if (!this->IsAssociative()) {
+                o << "Not associative. ";
+            }
+
+            if (this->IsAbelian()) {
+                o << "Abelian.";
+            } else {
+                o << "Non-abelian.";
+            }
+
+            if (this->IsCyclic()) {
+                o << " Cyclic.";
+            }
+
+            if (this->IsSimple()) {
+                o << " Simple.";
+            }
+
+            if (this->IsHamiltonian()) {
+                o << " Hamiltonian.";
+            }
+            else if (this->IsDedekind()) {
+                o << " Dedekind.";
             }
 
             return o.str();

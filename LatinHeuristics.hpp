@@ -134,8 +134,8 @@ class LatinHeuristics {
 
     public:
         LatinHeuristics(uint8_t order) {
-            if (order < 2 || order > 32) {
-                throw std::runtime_error("Invalid order value. Allowed: 2 -> 32");
+            if (order < 2 || order > 31) {
+                throw std::runtime_error("Invalid order value. Allowed: 2 -> 31");
             }
             
             this->order = order;

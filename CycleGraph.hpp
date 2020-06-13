@@ -48,7 +48,7 @@ class CycleGraph {
                 /*
                     By Lagrange's theorem we should get back to
                     the identity element after some steps in a
-                    power series. If not than the input is not
+                    power sequence. If not than the input is not
                     the Cayley table of a proper symmetry group.
                 */
                 int limit = this->order;
@@ -200,6 +200,32 @@ class CycleGraph {
                 }
 
             } while(cycleGroupIter != this->cycles.begin());
+
+            return code.str();
+        }
+
+        std::string PrintCyclicSubgroups() {
+            std::stringstream code;
+
+            for(const auto &cycleGroup : this->cycles) {
+                /*
+                    Progress from the shortest cycles to the longest.
+                */
+                for(const auto &cycle : *cycleGroup.second) {
+                    for(auto iter = cycle.begin(); iter != cycle.end(); iter++) {
+                        if (iter == cycle.begin()) {
+                            code << *iter << ": ";
+                        }
+
+                        if (std::next(iter) == cycle.end()) {
+                            code << *iter << ", 1\n";
+                        } else {
+                            code << *iter << ", ";
+                        }
+                    }
+                }
+
+            }
 
             return code.str();
         }
