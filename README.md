@@ -19,8 +19,7 @@ The underlying representation of the groups in each module is done by using [Cay
 | [AssocHeuristics.hpp](./AssocHeuristics.hpp) | Searches for proper groups by using the associative rule too. The results can be both abelian and non-abelian. |
 | [RandomHeuristics.hpp](./CycleGraph.hpp) | Same as AssocHeuristics but the search is randomized. This has much worse performance. |
 | [CycleGraph.hpp](./CycleGraph.hpp) | Can generate the [Graphviz](https://dreampuf.github.io/GraphvizOnline/) and the [CsAcademy](https://csacademy.com/app/graph_editor/) code of the [Cycle Graph](https://en.wikipedia.org/wiki/Cycle_graph_(algebra)) of a group. Can also list the cyclic subgroups of the group. |
-| [Classifier.hpp](./Classifier.hpp) | Checks for properties of the group. Now supports: Associative,
-Abelian, Cyclic, Simple, Dedekind, Hamiltonian. Can list the subgroups and normal subgroups. |
+| [Classifier.hpp](./Classifier.hpp) | Checks for properties of the group. Now supports: Associative, Abelian, Cyclic, Simple, Dedekind, Hamiltonian. Can list the subgroups and normal subgroups. |
 
 # 1. Example result: A<sub>4</sub>
 
