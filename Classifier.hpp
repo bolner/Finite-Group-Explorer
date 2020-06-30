@@ -161,7 +161,9 @@ class Classifier {
                 foundInverse:
 
                 /*
-                    Check if all g*n*inv element of G
+                    Check if all g*n*inv element of the subgroup.
+                    (The conjugate for all elements in the subgroup stays there.
+                    Left and right cosets equal.)
                 */
                 for(int n : subgroup) {
                     int gn = *(this->cayley + g * this->order + n - 1) - 1;

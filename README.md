@@ -6,9 +6,6 @@ Heuristic search algorithms for [abelian](https://en.wikipedia.org/wiki/Abelian_
 My main motivation was the lack of similar heuristic programs on the internet. I was curious which are the biggest
 groups that can be found this way, and how soon would one reach a combinatorial explosion on current CPUs. (This limit seems to be around order 10 for random search and 16-20 for the systematic.)
 
-The plan is to develop this application to a simple tool that helps to find concrete examples of
-groups mentioned in text books and to be able to generate their representations in many different formats.
-
 # Modules
 
 The underlying representation of the groups in each module is done by using [Cayley tables](https://en.wikipedia.org/wiki/Cayley_table). In addition to the Cayley table, the search algorithms are making use of bitmasks that summarize values appearing on a given row or column (etc.). This technique is used frequently in Chess engines.
@@ -17,7 +14,7 @@ The underlying representation of the groups in each module is done by using [Cay
 | --- | --- |
 | [LatinHeuristics.hpp](./LatinHeuristics.hpp) | Searches for [reduced latin squares](https://en.wikipedia.org/wiki/Latin_square#Reduced_form) and disregards the [associative rule](https://en.wikipedia.org/wiki/Group_(mathematics)#Definition). Its findings might be either quasigroups or groups when associativity appears by chance. |
 | [AssocHeuristics.hpp](./AssocHeuristics.hpp) | Searches for proper groups by using the associative rule too. The results can be both abelian and non-abelian. |
-| [RandomHeuristics.hpp](./CycleGraph.hpp) | Same as AssocHeuristics but the search is randomized. This has much worse performance. |
+| [RandomHeuristics.hpp](./RandomHeuristics.hpp) | Same as AssocHeuristics but the search is randomized. This has much worse performance. |
 | [CycleGraph.hpp](./CycleGraph.hpp) | Can generate the [Graphviz](https://dreampuf.github.io/GraphvizOnline/) and the [CsAcademy](https://csacademy.com/app/graph_editor/) code of the [Cycle Graph](https://en.wikipedia.org/wiki/Cycle_graph_(algebra)) of a group. Can also list the cyclic subgroups of the group. |
 | [Classifier.hpp](./Classifier.hpp) | Checks for properties of the group. Now supports: Associative, Abelian, Cyclic, Simple, Dedekind, Hamiltonian. Can list the subgroups and normal subgroups. |
 
